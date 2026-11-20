@@ -1,0 +1,51 @@
+name: Dihadi Download
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Media link"
+        required: true
+      chat_id:
+        description: "Telegram chat id"
+        required: true
+      reply_to:
+        description: "Message id to reply to"
+        required: false
+      status_id:
+        description: "Status message id to edit"
+        required: false
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write cookies (optional)
+        env:
+          COOKIES: ${{ secrets.COOKIES_TXT }}
+        run: |
+          if [ -n "$COOKIES" ]; then
+            printf '%s\n' "$COOKIES" > cookies.txt
+            echo "cookies.txt written"
+          fi
+
+      - name: Download and send
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          MAX_FILE_SIZE_MB: "50"
+          URL: ${{ inputs.url }}
+          CHAT_ID: ${{ inputs.chat_id }}
+          REPLY_TO: ${{ inputs.reply_to }}
+          STATUS_ID: ${{ inputs.status_id }}
+        run: python run_once.py

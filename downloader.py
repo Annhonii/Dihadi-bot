@@ -64,6 +64,11 @@ def _sync_download(url: str, request_dir: Path) -> DownloadResult:
         "ignoreerrors": False,
     }
 
+    # Optional cookies (helps with Instagram / YouTube login or bot checks)
+    cookies_path = Path(__file__).resolve().parent / "cookies.txt"
+    if cookies_path.exists():
+        ydl_opts["cookiefile"] = str(cookies_path)
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
